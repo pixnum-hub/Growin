@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Growin — LinkedIn Analytics</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14213D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Growin">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FBF9F4;--surface:#FFFFFF;--ink:#14213D;--text:#20242C;--muted:#5C6470;
+  --line:#D8D2C4;--amber:#B8791F;--stamp:#14213D;--stamp-text:#FBF9F4;--radius:10px;
+}
+[data-theme="dark"]{--bg:#10141C;--surface:#171C26;--ink:#EDEAE0;--text:#E7E4DA;--muted:#8B93A3;--line:#2B3140;--amber:#E8A33D;--stamp:#E8A33D;--stamp-text:#14141A;}
+[data-theme="oled"]{--bg:#000000;--surface:#0A0A0A;--ink:#FFFFFF;--text:#EDEDED;--muted:#8A8A8A;--line:#1E1E1E;--amber:#F2B84B;--stamp:#F2B84B;--stamp-text:#000000;}
+[data-theme="hc"]{--bg:#000000;--surface:#000000;--ink:#FFFFFF;--text:#FFFFFF;--muted:#FFFFFF;--line:#FFFFFF;--amber:#FFE500;--stamp:#FFE500;--stamp-text:#000000;--radius:0px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;transition:background .25s,color .25s;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+[data-theme="hc"] *{transition:none!important;}
+.wrap{width:100%;max-width:640px;padding:1.1rem 1.1rem 0;}
+.reset-row{display:flex;justify-content:flex-end;}
+header.masthead{width:100%;max-width:640px;padding:1.5rem 78px .8rem 1.1rem;border-bottom:2px solid var(--ink);position:relative;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-top:.3rem;}
+h1{font-family:'Sora',sans-serif;font-weight:700;font-size:1.9rem;margin:.2rem 0 .15rem;color:var(--ink);line-height:1.05;}
+.sub{color:var(--muted);font-size:.87rem;max-width:46ch;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.1rem;margin-top:1rem;}
+[data-theme="hc"] .card{border:2px solid var(--line);}
+.card h2{font-family:'Sora',sans-serif;font-size:1.15rem;margin:0 0 .8rem;color:var(--ink);}
+.card h3{font-family:'Sora',sans-serif;font-size:.95rem;margin:1rem 0 .5rem;color:var(--ink);}
+label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.25rem;font-weight:500;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
+input,select,textarea{width:100%;padding:.55rem .6rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.9rem;margin-bottom:.6rem;}
+textarea{font-family:'Inter',sans-serif;resize:vertical;min-height:64px;}
+input:focus,select:focus,textarea:focus,button:focus{outline:2px solid var(--amber);outline-offset:2px;}
+.note{font-size:.72rem;color:var(--muted);margin:-.35rem 0 .7rem;line-height:1.4;}
+button{cursor:pointer;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-weight:600;font-size:.88rem;}
+.btn-primary{width:100%;padding:.75rem;background:var(--ink);color:var(--bg);}
+.btn-ghost{padding:.5rem .8rem;background:transparent;border:1px solid var(--line);color:var(--text);}
+.results{display:none;} .results.show{display:block;}
+.stamp-row{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;}
+.stamp{width:78px;height:78px;border-radius:50%;background:var(--stamp);color:var(--stamp-text);display:flex;align-items:center;justify-content:center;flex-direction:column;flex:none;font-family:'Sora',sans-serif;font-weight:700;transform:rotate(-6deg);border:3px dashed var(--stamp-text);}
+.stamp .g{font-size:1.7rem;line-height:1;} .stamp .l{font-size:.55rem;letter-spacing:.05em;}
+.stamp-note{font-size:.88rem;color:var(--text);} .stamp-note b{color:var(--ink);}
+.ledger-line,.stat-line{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:.85rem;gap:.5rem;}
+.ledger-line:last-child,.stat-line:last-child{border-bottom:none;}
+.ledger-line span:first-child,.stat-line span:first-child{color:var(--muted);font-family:'Inter',sans-serif;}
+.hist-row{display:grid;grid-template-columns:auto 1fr auto;gap:.6rem;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--line);font-size:.8rem;}
+.hist-row:last-child{border-bottom:none;}
+.hist-date{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.72rem;}
+.bar-track{background:var(--bg);border:1px solid var(--line);border-radius:4px;height:8px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--amber);}
+.hist-grade{font-family:'Sora',sans-serif;font-weight:700;color:var(--ink);}
+.empty{color:var(--muted);font-size:.85rem;font-style:italic;}
+.suggest-list{list-style:none;margin:0;padding:0;}
+.suggest-list li{display:flex;gap:.6rem;align-items:flex-start;padding:.55rem 0;border-bottom:1px solid var(--line);font-size:.85rem;line-height:1.45;}
+.suggest-list li:last-child{border-bottom:none;}
+.suggest-list li::before{content:'→';color:var(--amber);font-weight:700;flex:none;}
+.mini-row{display:grid;grid-template-columns:80px 1fr auto;gap:.5rem;align-items:center;font-size:.78rem;margin-bottom:.45rem;}
+.mini-track{background:var(--bg);border:1px solid var(--line);border-radius:4px;height:8px;overflow:hidden;}
+.mini-fill{height:100%;background:var(--ink);}
+.tag-pill{display:inline-flex;justify-content:space-between;gap:.4rem;background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:.2rem .6rem;font-size:.75rem;margin:.15rem .3rem .15rem 0;font-family:'JetBrains Mono',monospace;}
+.progress-track{background:var(--bg);border:1px solid var(--line);border-radius:6px;height:10px;overflow:hidden;margin:.5rem 0;}
+.progress-fill{height:100%;background:var(--amber);transition:width .3s;}
+.spark{width:100%;height:46px;display:block;}
+.hook-meta{display:flex;justify-content:space-between;font-size:.78rem;margin-top:-.3rem;}
+.hook-meta.warn{color:var(--amber);}
+footer{width:100%;max-width:640px;margin-top:1.4rem;padding:1.4rem 1.1rem 2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.8rem;}
+.theme-dial{position:absolute;top:1.1rem;right:1.1rem;width:48px;height:48px;border-radius:50%;border:2px dashed var(--stamp-text);background:var(--stamp);color:var(--stamp-text);font-family:'Sora',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:.02em;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .25s,color .25s;}
+.theme-dial:active{transform:scale(.94);}
+.copyright{font-size:.72rem;color:var(--muted);line-height:1.5;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+@media(min-width:600px){.grid2.g4{grid-template-columns:repeat(4,1fr);} h1{font-size:2.3rem;}}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <button class="theme-dial" id="themeDial" type="button"></button>
+  <h1>Growin</h1>
+  <div class="eyebrow">LinkedIn Personal Branding Desk</div>
+  <p class="sub">Log a LinkedIn post's numbers, get an editorial read on how it performed — and patterns you can act on over time.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="reset-row"><button class="btn-ghost" id="resetAllBtn">Reset all inputs</button></div>
+
+  <section class="card">
+    <h2>Weekly goal</h2>
+    <div class="grid2">
+      <div><label for="goalInput">Posts per week</label><input type="number" id="goalInput" min="1" placeholder="3"></div>
+      <div style="align-self:end;"><button class="btn-ghost" id="goalSaveBtn" style="width:100%;">Save goal</button></div>
+    </div>
+    <p class="note" id="goalNote">Set a target to track your pace.</p>
+    <div class="progress-track"><div class="progress-fill" id="goalFill" style="width:0%;"></div></div>
+  </section>
+
+  <section class="card">
+    <h2>Log this post</h2>
+    <div class="grid2">
+      <div><label for="pubDate">Publish date</label><input type="date" id="pubDate"></div>
+      <div><label for="timeSlot">Time of day</label>
+        <select id="timeSlot">
+          <option value="morning">Morning (6–11am)</option>
+          <option value="midday">Midday (11am–2pm)</option>
+          <option value="afternoon">Afternoon (2–5pm)</option>
+          <option value="evening">Evening (5–9pm)</option>
+          <option value="night">Night (9pm–6am)</option>
+        </select>
+      </div>
+    </div>
+    <label for="postType">Content type</label>
+    <select id="postType">
+      <option value="text">Text</option>
+      <option value="image">Image</option>
+      <option value="carousel">Carousel (PDF/document)</option>
+      <option value="video">Video</option>
+      <option value="poll">Poll</option>
+    </select>
+    <p class="note" id="lengthGuide"></p>
+    <div class="grid2">
+      <div><label for="pillar">Brand pillar / topic</label><input type="text" id="pillar" style="font-family:'Inter',sans-serif;" placeholder="Leadership"></div>
+      <div><label for="hashtags">Hashtags used</label><input type="text" id="hashtags" placeholder="#leadership, #ai"></div>
+    </div>
+    <div class="grid2 g4">
+      <div><label for="impr">Impressions</label><input type="number" id="impr" min="0" placeholder="4200"></div>
+      <div><label for="likes">Reactions</label><input type="number" id="likes" min="0" placeholder="130"></div>
+      <div><label for="comments">Comments</label><input type="number" id="comments" min="0" placeholder="18"></div>
+      <div><label for="shares">Reposts</label><input type="number" id="shares" min="0" placeholder="6"></div>
+    </div>
+    <label for="followers">New followers</label>
+    <input type="number" id="followers" min="0" placeholder="9">
+    <button class="btn-primary" id="calcBtn">Stamp this post</button>
+  </section>
+
+  <section class="card">
+    <h2>Hook checker</h2>
+    <label for="hookText">First line (what shows before "see more")</label>
+    <textarea id="hookText" placeholder="Paste your opening line here…"></textarea>
+    <div class="hook-meta" id="hookMeta"><span>0 characters</span><span></span></div>
+  </section>
+
+  <section class="card results" id="results">
+    <h2>Editorial read</h2>
+    <div class="stamp-row">
+      <div class="stamp"><span class="g" id="stampGrade">–</span><span class="l">GRADE</span></div>
+      <p class="stamp-note" id="stampNote"></p>
+    </div>
+    <div class="ledger-line"><span>Engagement rate</span><span id="engOut">–</span></div>
+    <div class="ledger-line"><span>Follower conversion</span><span id="convOut">–</span></div>
+    <div class="ledger-line"><span>Vs. your average</span><span id="benchOut">–</span></div>
+    <div class="ledger-line"><span>Hashtag count</span><span id="tagCountOut">–</span></div>
+  </section>
+
+  <section class="card">
+    <h2>Patterns</h2>
+    <div class="stat-line"><span>Posting streak</span><span id="streakOut">–</span></div>
+    <div class="stat-line"><span>Best day to post</span><span id="bestDayOut">Not enough data yet</span></div>
+    <div class="stat-line"><span>Best time slot</span><span id="bestTimeOut">Not enough data yet</span></div>
+    <h3>Engagement trend</h3>
+    <svg class="spark" id="sparkSvg" viewBox="0 0 200 46" preserveAspectRatio="none"></svg>
+  </section>
+
+  <section class="card">
+    <h2>Suggestions</h2>
+    <ul class="suggest-list" id="suggestList"></ul>
+  </section>
+
+  <section class="card">
+    <h2>Content mix</h2>
+    <h3>By format</h3>
+    <div id="typeMix"><p class="empty">Log posts to see your format mix.</p></div>
+    <h3>By brand pillar</h3>
+    <div id="pillarMix"><p class="empty">Log posts to see your topic mix.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Hashtag tracker</h2>
+    <div id="tagCloud"><p class="empty">No hashtags logged yet.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Ledger history</h2>
+    <div id="historyList"><p class="empty">No entries yet — stamp your first post above.</p></div>
+    <button class="btn-ghost" id="clearBtn" style="margin-top:.8rem;">Clear history</button>
+  </section>
+
+
+</div>
+
+<footer>
+  <div class="copyright"><span>© <span id="year"></span> Manik Roy. All Rights Reserved.</span></div>
+</footer>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+document.getElementById('pubDate').valueAsDate = new Date();
+
+const root = document.documentElement;
+const THEMES = ['light','dark','oled','hc'];
+const THEME_LABELS = {light:'Light',dark:'Dark',oled:'OLED',hc:'HC'};
+const dial = document.getElementById('themeDial');
+function applyTheme(t){
+  root.setAttribute('data-theme', t);
+  localStorage.setItem('lb-theme', t);
+  dial.textContent = THEME_LABELS[t];
+  dial.setAttribute('aria-label', 'Theme: ' + THEME_LABELS[t] + '. Tap to switch.');
+  dial.title = 'Tap to switch theme';
+}
+dial.addEventListener('click', () => {
+  const current = root.getAttribute('data-theme') || 'light';
+  applyTheme(THEMES[(THEMES.indexOf(current) + 1) % THEMES.length]);
+});
+applyTheme(localStorage.getItem('lb-theme') || 'light');
+
+const LENGTH_GUIDE = {
+  text: "900–1,200 characters total. Front-load the hook — the first ~140 characters show before \"see more\".",
+  image: "150–300 characters. Let the image carry the story; the caption adds context, not repetition.",
+  carousel: "6–10 slides. The cover slide needs a headline that stands alone in the feed.",
+  video: "Caption under 200 characters. Native upload — the first 3 seconds decide the scroll-past.",
+  poll: "One sharp question, up to 4 options. Bait a follow-up conversation in your own first comment."
+};
+const postType = document.getElementById('postType');
+function updateGuide(){ document.getElementById('lengthGuide').textContent = LENGTH_GUIDE[postType.value]; }
+postType.addEventListener('change', updateGuide); updateGuide();
+
+const hookText = document.getElementById('hookText');
+hookText.addEventListener('input', () => {
+  const n = hookText.value.length;
+  const meta = document.getElementById('hookMeta');
+  meta.className = 'hook-meta' + (n > 140 ? ' warn' : '');
+  meta.innerHTML = `<span>${n} characters</span><span>${n > 140 ? 'Truncates on mobile — trim it' : 'Fits before "see more"'}</span>`;
+});
+
+function gradeFor(rate){
+  if(rate>=8) return {letter:'A+', note:"Top-tier read — this post is doing the rounds beyond your usual audience."};
+  if(rate>=5) return {letter:'A', note:"Strong showing. Your network is actively engaging, not just scrolling past."};
+  if(rate>=3) return {letter:'B', note:"Solid, healthy engagement — comfortably above the LinkedIn average."};
+  if(rate>=1.5) return {letter:'C', note:"Middling reach. Try a sharper hook or a question in your opening line."};
+  if(rate>=0.5) return {letter:'D', note:"Reach outpaced engagement. Reply to early comments to lift the algorithm."};
+  return {letter:'F', note:"Low signal on this one. Consider a format change: carousel, poll, or native video."};
+}
+function tagSweetSpot(n){
+  if(n===0) return "No tags — try 3–5 relevant ones.";
+  if(n<3) return "Add a couple more — 3–5 is the sweet spot.";
+  if(n<=5) return "Right in the sweet spot.";
+  return "Trim it — more than 5 dilutes reach.";
+}
+
+function loadHistory(){ return JSON.parse(localStorage.getItem('lb-history') || '[]'); }
+function saveHistory(h){ localStorage.setItem('lb-history', JSON.stringify(h)); }
+
+function isoWeekKey(dateStr){
+  const date = new Date(dateStr+'T00:00:00');
+  const target = new Date(date.valueOf());
+  const dayNr = (date.getDay()+6)%7;
+  target.setDate(target.getDate()-dayNr+3);
+  const firstThursday = new Date(target.getFullYear(),0,4);
+  const diff = target - firstThursday;
+  const week = 1+Math.round(diff/(7*24*3600*1000));
+  return target.getFullYear()+'-W'+week;
+}
+function weekdayName(dateStr){ return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US',{weekday:'short'}); }
+
+function computeStreak(history){
+  const weeks = new Set(history.map(h => isoWeekKey(h.date)));
+  let streak = 0, cursor = new Date();
+  while(weeks.has(isoWeekKey(cursor.toISOString().slice(0,10)))){ streak++; cursor.setDate(cursor.getDate()-7); }
+  return streak;
+}
+function bestGroup(history, field, labelFn){
+  const groups = {};
+  history.forEach(h => (groups[h[field]] = groups[h[field]] || []).push(h.rate));
+  let best=null, bestAvg=-1;
+  for(const k in groups){ const avg = groups[k].reduce((a,b)=>a+b,0)/groups[k].length; if(avg>bestAvg){bestAvg=avg; best=k;} }
+  return best ? `${labelFn(best)} (${bestAvg.toFixed(1)}% avg)` : null;
+}
+
+const TIME_LABELS = {morning:'Morning',midday:'Midday',afternoon:'Afternoon',evening:'Evening',night:'Night'};
+
+function renderGoal(){
+  const goal = +localStorage.getItem('lb-goal') || 0;
+  document.getElementById('goalInput').value = goal || '';
+  const hist = loadHistory();
+  const thisWeek = isoWeekKey(new Date().toISOString().slice(0,10));
+  const count = hist.filter(h => isoWeekKey(h.date) === thisWeek).length;
+  if(goal > 0){
+    document.getElementById('goalNote').textContent = `${count} of ${goal} posts logged this week.`;
+    document.getElementById('goalFill').style.width = Math.min(100, (count/goal)*100) + '%';
+  } else {
+    document.getElementById('goalNote').textContent = 'Set a target to track your pace.';
+    document.getElementById('goalFill').style.width = '0%';
+  }
+}
+document.getElementById('goalSaveBtn').addEventListener('click', () => {
+  localStorage.setItem('lb-goal', +document.getElementById('goalInput').value || 0);
+  renderGoal();
+});
+
+function renderPatterns(history){
+  document.getElementById('streakOut').textContent = history.length ? computeStreak(history) + (computeStreak(history)===1?' week':' weeks') : '–';
+  document.getElementById('bestDayOut').textContent = history.length>=3 ? bestGroup(history,'day', d=>d) : 'Not enough data yet';
+  document.getElementById('bestTimeOut').textContent = history.length>=3 ? bestGroup(history,'time', t=>TIME_LABELS[t]||t) : 'Not enough data yet';
+
+  const svg = document.getElementById('sparkSvg');
+  const pts = history.slice(-12);
+  if(pts.length<2){ svg.innerHTML=''; return; }
+  const max = Math.max(...pts.map(p=>p.rate),1);
+  const step = 200/(pts.length-1);
+  const coords = pts.map((p,i) => `${(i*step).toFixed(1)},${(46-(p.rate/max)*42).toFixed(1)}`).join(' ');
+  svg.innerHTML = `<polyline points="${coords}" fill="none" stroke="var(--amber)" stroke-width="2"/>` +
+    pts.map((p,i) => `<circle cx="${(i*step).toFixed(1)}" cy="${(46-(p.rate/max)*42).toFixed(1)}" r="2.2" fill="var(--ink)"/>`).join('');
+}
+
+function renderMix(history){
+  function mix(field, elId){
+    const el = document.getElementById(elId);
+    if(!history.length){ el.innerHTML = '<p class="empty">Log posts to see your mix.</p>'; return; }
+    const counts = {};
+    history.forEach(h => { const k = h[field] || 'unspecified'; counts[k] = (counts[k]||0)+1; });
+    const entries = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+    const total = history.length;
+    el.innerHTML = entries.map(([k,c]) => `
+      <div class="mini-row">
+        <span>${k}</span>
+        <div class="mini-track"><div class="mini-fill" style="width:${(c/total*100).toFixed(0)}%"></div></div>
+        <span>${Math.round(c/total*100)}%</span>
+      </div>`).join('');
+  }
+  mix('type','typeMix');
+  mix('pillar','pillarMix');
+}
+
+function renderHashtags(history){
+  const el = document.getElementById('tagCloud');
+  const counts = {};
+  history.forEach(h => (h.tags||[]).forEach(t => counts[t] = (counts[t]||0)+1));
+  const entries = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  el.innerHTML = entries.length ? entries.map(([t,c]) => `<span class="tag-pill">#${t} · ${c}</span>`).join('') : '<p class="empty">No hashtags logged yet.</p>';
+}
+
+function renderHistory(){
+  const hist = loadHistory();
+  const el = document.getElementById('historyList');
+  if(!hist.length){ el.innerHTML = '<p class="empty">No entries yet — stamp your first post above.</p>'; return; }
+  const max = Math.max(...hist.map(h => h.rate), 1);
+  el.innerHTML = hist.slice(-8).reverse().map(h => `
+    <div class="hist-row">
+      <span class="hist-date">${h.date}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,(h.rate/max)*100)}%"></div></div>
+      <span class="hist-grade">${h.grade}</span>
+    </div>`).join('');
+}
+
+function renderSuggestions(history){
+  const el = document.getElementById('suggestList');
+  const tips = [];
+
+  if(history.length === 0){
+    tips.push('Log your first post above to start getting suggestions tailored to your data.');
+  } else {
+    if(history.length >= 4){
+      const last = history.slice(-3);
+      const prior = history.slice(0, -3);
+      if(prior.length){
+        const lastAvg = last.reduce((a,h)=>a+h.rate,0)/last.length;
+        const priorAvg = prior.reduce((a,h)=>a+h.rate,0)/prior.length;
+        if(lastAvg < priorAvg*0.85) tips.push('Your last few posts are trailing your earlier average — try a sharper hook or a different format.');
+        else if(lastAvg > priorAvg*1.15) tips.push('Your recent posts are outperforming your average — note what changed and repeat it.');
+      }
+    }
+    if(history.length >= 3){
+      const bd = bestGroup(history,'day', d=>d);
+      const bt = bestGroup(history,'time', t=>TIME_LABELS[t]||t);
+      if(bd) tips.push(`Posts land best on ${bd.split(' (')[0]} — save your next important post for that day.`);
+      if(bt) tips.push(`${bt.split(' (')[0]} is your strongest slot — schedule around it when you can.`);
+    }
+    const typeCounts = {};
+    history.forEach(h => typeCounts[h.type] = (typeCounts[h.type]||0)+1);
+    const top = Object.entries(typeCounts).sort((a,b)=>b[1]-a[1])[0];
+    if(top && history.length>=3 && top[1]/history.length > 0.7){
+      tips.push(`${Math.round(top[1]/history.length*100)}% of your posts are ${top[0]} — mix in another format to test reach.`);
+    }
+    const avgTags = history.reduce((a,h)=>a+(h.tags||[]).length,0)/history.length;
+    if(avgTags < 3) tips.push('You\'re averaging under 3 hashtags per post — add a couple more to widen reach.');
+    else if(avgTags > 5) tips.push('You\'re averaging more than 5 hashtags per post — trim to 3–5 for cleaner reach.');
+    const goal = +localStorage.getItem('lb-goal') || 0;
+    if(goal > 0){
+      const thisWeek = isoWeekKey(new Date().toISOString().slice(0,10));
+      const count = history.filter(h => isoWeekKey(h.date) === thisWeek).length;
+      if(count < goal) tips.push(`You're at ${count} of ${goal} posts this week — ${goal-count} more to hit your goal.`);
+    }
+    if(computeStreak(history) === 0) tips.push('No active posting streak — publish this week to start a new one.');
+  }
+  if(!tips.length) tips.push('Steady work — keep logging posts to surface new patterns.');
+  el.innerHTML = tips.slice(0,4).map(t => `<li>${t}</li>`).join('');
+}
+
+function renderAll(){
+  const hist = loadHistory();
+  renderHistory(); renderPatterns(hist); renderMix(hist); renderHashtags(hist); renderGoal(); renderSuggestions(hist);
+}
+
+document.getElementById('calcBtn').addEventListener('click', () => {
+  const impr = +document.getElementById('impr').value || 0;
+  const likes = +document.getElementById('likes').value || 0;
+  const comments = +document.getElementById('comments').value || 0;
+  const shares = +document.getElementById('shares').value || 0;
+  const followers = +document.getElementById('followers').value || 0;
+  const date = document.getElementById('pubDate').value || new Date().toISOString().slice(0,10);
+  const time = document.getElementById('timeSlot').value;
+  const type = postType.value;
+  const pillar = (document.getElementById('pillar').value || 'Unspecified').trim();
+  const tags = document.getElementById('hashtags').value.split(/[,\s]+/).map(t=>t.replace('#','').trim().toLowerCase()).filter(Boolean);
+
+  if(impr <= 0){ document.getElementById('impr').focus(); return; }
+
+  const priorHistory = loadHistory();
+  const priorAvg = priorHistory.length ? priorHistory.reduce((a,h)=>a+h.rate,0)/priorHistory.length : null;
+  const rate = ((likes + comments + shares) / impr) * 100;
+  const conv = (followers / impr) * 100;
+  const g = gradeFor(rate);
+
+  document.getElementById('stampGrade').textContent = g.letter;
+  document.getElementById('stampNote').innerHTML = `<b>${rate.toFixed(2)}% engagement.</b> ${g.note}`;
+  document.getElementById('engOut').textContent = rate.toFixed(2) + '%';
+  document.getElementById('convOut').textContent = conv.toFixed(3) + '%';
+  document.getElementById('benchOut').textContent = priorAvg===null ? 'First entry — sets your baseline' : (rate>=priorAvg ? '+' : '') + (rate-priorAvg).toFixed(2) + ' pts vs avg';
+  document.getElementById('tagCountOut').textContent = `${tags.length} — ${tagSweetSpot(tags.length)}`;
+  document.getElementById('results').classList.add('show');
+
+  const hist = loadHistory();
+  hist.push({date, day: weekdayName(date), time, type, pillar, tags, rate: +rate.toFixed(2), grade: g.letter});
+  saveHistory(hist);
+  renderAll();
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => { localStorage.removeItem('lb-history'); renderAll(); });
+
+document.getElementById('resetAllBtn').addEventListener('click', () => {
+  document.getElementById('goalInput').value = '';
+  localStorage.removeItem('lb-goal');
+  document.getElementById('pubDate').valueAsDate = new Date();
+  document.getElementById('timeSlot').value = 'morning';
+  postType.value = 'text'; updateGuide();
+  document.getElementById('pillar').value = '';
+  document.getElementById('hashtags').value = '';
+  document.getElementById('impr').value = '';
+  document.getElementById('likes').value = '';
+  document.getElementById('comments').value = '';
+  document.getElementById('shares').value = '';
+  document.getElementById('followers').value = '';
+  hookText.value = '';
+  hookText.dispatchEvent(new Event('input'));
+  document.getElementById('results').classList.remove('show');
+  renderGoal();
+});
+
+renderAll();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
